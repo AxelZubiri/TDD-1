@@ -9,7 +9,7 @@ class CalculatorTest {
         // 1. Preparación (Arrange)
         Calculator calc = new Calculator();
         // 2. Ejecución (Act)
-        int resultado = calc.suma(2, 3);
+        int resultado = calc.suma(2, 1);
         // 3. Verificación (Assert)
         assertEquals(5, resultado, "La suma 2 + 3 debería ser 5");
     }
