@@ -41,7 +41,7 @@ public class App {
 
                     int num1 = scanner.nextInt();
 
-                    System.out.print("Insert the second number: ");
+                    System.out.print ("Insert the second number: ");
 
                     if (!scanner.hasNextInt()) {
                         System.out.println("Error: insert a whole number");
