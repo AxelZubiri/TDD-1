@@ -78,7 +78,7 @@ public class App {
 
                 case 0:
                     out = true;
-                    System.out.println("Goodbye");
+                    System.out.println ("Goodbye");
                     break;
 
                 default:
