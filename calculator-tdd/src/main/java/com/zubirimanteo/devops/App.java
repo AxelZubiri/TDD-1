@@ -31,7 +31,7 @@ public class App {
                 case 1:
                 case 2:
                 case 3:
-                    System.out.print("Insert the first number: ");
+                    System.out.print ("Insert the first number: ");
 
                     if (!scanner.hasNextInt()) {
                         System.out.println("Error: Insert whole number");
