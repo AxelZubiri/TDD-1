@@ -1,31 +1,85 @@
-name: Calculadora CI with Maven
+name: Pipeline CI Avanzado
 
-# Cambiamos el evento de push a pull_request
 on:
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build:
+  # JOB 1: Análisis de calidad (linting)
+  code_quality:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: calculator-tdd
-    strategy:
-      matrix:
-        java: [ '17', '21' ]
     steps:
-      - name: Descargar el código del repositorio
+      - name: Checkout del código
         uses: actions/checkout@v4
-      - name: Configurar el JDK ${{ matrix.java }}
+
+      - name: Configurar Java 17 y caché
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java }}
+          java-version: '17'
           distribution: 'temurin'
-      - name: Compilar y empaquetar con Maven
-        run: mvn clean package
-      - name: Guardar la Calculadora compilada
+          cache: 'maven'
+          cache-dependency-path: calculator-tdd/pom.xml
+
+      - name: Ejecutar Checkstyle
+        run: mvn checkstyle:check
+
+  # JOB 2: Testing y cobertura
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: calculator-tdd
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17 y caché
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: calculator-tdd/pom.xml
+
+      - name: Ejecutar tests unitarios (genera reporte JaCoCo)
+        run: mvn test
+
+      - name: Subir reporte de cobertura a GitHub
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-cobertura-jacoco
+          path: calculator-tdd/target/site/jacoco/
+          retention-days: 7
+
+  # JOB 3: Empaquetado de la aplicación
+  package:
+    needs: [code_quality, test]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: calculator-tdd
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17 y caché
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: calculator-tdd/pom.xml
+
+      - name: Construir el JAR (sin tests, ya pasaron)
+        run: mvn package -DskipTests
+
+      - name: Subir artefacto JAR
         uses: actions/upload-artifact@v4
         with:
-          name: calculadora-app-java${{ matrix.java }}
+          name: calculadora-app
           path: calculator-tdd/target/*.jar
+          retention-days: 7
